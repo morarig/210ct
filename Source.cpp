@@ -1,54 +1,41 @@
 #include<iostream>
-#include<fstream>
+#include"materials.h"
 using namespace std;
 
+void display(map<string,unsigned> materials)//just to see display maps
+{
+	for (auto index = materials.begin(); index != materials.end(); index++)
+	{
+		cout << (*index).first << " ";
+		cout << (*index).second << endl;
+	}
+}
 void main()
 {
-	//opening input file
-	ifstream input ("data.in");
-	unsigned int n,m;
-	//reading the integer couples couples 
-	while (input>>n>>m)
+	materials my_materaials;
+	my_materaials.add_material("cocaina", 2, 99999);
+	my_materaials.add_material("lapte", 20, 5);
+	my_materaials.add_material("iphonee", 5, 10000);
+	map<string, unsigned> cargo;
+	unsigned lorry_capacity = 10, value = 0;
+	bool finished_materials = 0;
+	auto material = my_materaials.materials_by_price.begin();
+	while (lorry_capacity >= my_materaials.materials_by_weight[material->first])
 	{
-		if (m <= n && m != 0 || m == 1 || (m == 1 && n == 0)) printf("%d devides %d!\n", m, n);//special cases
-		else
+		value += material->second;
+		lorry_capacity -= my_materaials.materials_by_weight[material->first];
+		cargo.insert(pair<string, unsigned>(material->first, my_materaials.materials_by_weight[material->first]));
+		if (++material == my_materaials.materials_by_price.end())
 		{
-			bool factorial_vals[250], found = 0;
-			int index, auxiliary = m;
-			for (index = 1;index <= int(n);index++)
-				factorial_vals[index] = 1;
-			index = 2;
-			//take all prime divisors of m and search for them or their multiples in factorial_vals
-			while (auxiliary > 1)
-			{
-				if (auxiliary % index == 0)
-				{
-					auxiliary /= index;
-					int searched_val = index;
-					int k = 2;
-					found = 0;
-					while (searched_val <= int(n))
-					{
-						if (factorial_vals[searched_val])
-						{
-							factorial_vals[searched_val] = 0;
-							found = 1;
-							break;
-						}
-						else
-						{
-							searched_val = index * k;
-							k++;
-						}
-					}
-					if (!found)
-						break;
-				}
-				else index++;
-			}
-			if (!found)
-				printf("%d does not devide %d!\n", m, n);
-			else printf("%d devides %d!\n", m, n);
+			finished_materials = 1;
+			break;
 		}
 	}
+	if (!finished_materials)
+	{
+		value += (material->second / my_materaials.materials_by_weight[material->first]) * lorry_capacity;
+		cargo.insert(pair<string, unsigned>(material->first, lorry_capacity));
+	}
+	cout << "Max cargo value : " << value << endl;
+	display(cargo);
 }

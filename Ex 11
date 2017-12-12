@@ -1,0 +1,43 @@
+#include<iostream>
+#include<fstream>
+using namespace std;
+
+void visit_connected_vertexes(int graph_matrix[100][100],int nr_vertex, int start_vertex,bool visited[100])
+{
+	visited[start_vertex] = 1;
+	for (int index = 0;index < nr_vertex;index++)
+		if (graph_matrix[start_vertex][index] && !visited[index])
+			visit_connected_vertexes(graph_matrix, nr_vertex, index, visited);
+}
+
+bool isConnected(int graph_matrix[100][100],int nr_vertex)
+{
+	bool visited[100];
+	for (int index = 0;index < nr_vertex;index++)
+		visited[index] = 0;
+	visit_connected_vertexes(graph_matrix,nr_vertex, 1, visited);
+	for (int index = 0;index < nr_vertex;index++)
+		if (visited[index] == 0)
+			return false;
+	return true;
+}
+
+void main()
+{
+	unsigned nr_vertex, nr_edges, vertex1, vertex2;
+	int graph_matrix[100][100];//the graph is represented by its adiacence matrix
+	for (unsigned line = 0;line < 100;line++)
+		for (unsigned column = 0;column < 100;column++)
+			graph_matrix[line][column] = 0;
+	ifstream file("graph.in");
+	file >> nr_vertex >> nr_edges;//reading number of vertexes and number of edges
+	for (unsigned index = 0;index < nr_edges;index++)//reading edges
+	{
+		file >> vertex1 >> vertex2;
+		graph_matrix[vertex1 - 1][vertex2 -1] = graph_matrix[vertex2 - 1][vertex1 - 1] = 1;//adiacence matrix construction
+	}
+	file.close();
+	if (nr_vertex > 0 && isConnected(graph_matrix,nr_vertex))
+		cout << "The given graph is connected !\n";
+	else cout << "The given graph is not connected !\n";
+}

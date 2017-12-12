@@ -1,0 +1,558 @@
+#include<iostream>
+#include<cstdlib>
+#include<string>
+#include<map>
+#include<list>
+using namespace std;
+
+//student data
+struct student_data
+{
+	int id;
+	string name;
+	string birth_date;
+	string adress;
+	int class_id;
+	string enrolment_date;
+	bool status;//true for graduate , false for undergraduate
+};
+
+//generic tree node , and declaration of root
+struct node
+{
+	student_data data;
+    struct node *left;
+    struct node *right;
+}*root;
+
+//declaration of class (handler) for binary search tree nodes
+class binary_search_tree
+{
+    public:
+		void find_node(int, node **, node **);
+        void insert_node(node *tree, node *newnode);
+        void delete_node(int);
+        void case_a(node *,node *);
+        void case_b(node *,node *);
+        void case_c(node *,node *);
+        void display_by_class(node *,int);//the int value will specify wich students will be displayed (by status)
+		void lexicographic_display(node *,int );//same here
+		void delete_students(node *,int);//same here
+        binary_search_tree()
+        {
+            root = NULL;
+        }
+};
+
+void display_student_info(node *location)
+{
+	cout << endl;
+	cout << "	Name : " << location->data.name << endl;
+	cout << "	ID : " << location->data.id << endl;
+	cout << "	Class ID : " << location->data.class_id << endl;
+	cout << "	Adress : " << location->data.adress << endl;
+	cout << "	Birth date : " << location->data.birth_date << endl;
+	cout << "	Enrolment date : " << location->data.enrolment_date << endl;
+	cout << "	Status : ";
+	switch (location->data.status)
+	{
+	case 1:cout << "graduated" << endl;
+		break;
+	case 0:cout << "undergraduate"<<endl;
+		break;
+	}
+	cout << endl;
+}
+
+void insert_some_students(binary_search_tree tree)
+{
+	node *temp;
+	temp = new node;
+
+	temp->data.adress = "Marginea 2117";
+	temp->data.birth_date = "22/05/1998";
+	temp->data.class_id = 1;
+	temp->data.enrolment_date = "01/01/2015";
+	temp->data.id = 101;
+	temp->data.name = "Pomohaci Alexandru";
+	temp->data.status = 1;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Fratautii mijlocii";
+	temp->data.birth_date = "05/10/1997";
+	temp->data.class_id = 1;
+	temp->data.enrolment_date = "01/01/2015";
+	temp->data.id = 102;
+	temp->data.name = "Morari Georgiana";
+	temp->data.status = 1;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Winterfell";
+	temp->data.birth_date = "01/01/1998";
+	temp->data.class_id = 2;
+	temp->data.enrolment_date = "01/01/2015";
+	temp->data.id = 201;
+	temp->data.name = "Jon Snow";
+	temp->data.status = 1;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Winterfell";
+	temp->data.birth_date = "22/05/2000";
+	temp->data.class_id = 1;
+	temp->data.enrolment_date = "21/01/2017";
+	temp->data.id = 103;
+	temp->data.name = "Arya Stark";
+	temp->data.status = 0;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Kingslanding";
+	temp->data.birth_date = "22/05/2000";
+	temp->data.class_id = 2;
+	temp->data.enrolment_date = "01/01/2015";
+	temp->data.id = 202;
+	temp->data.name = "Joffrey Baratheon";
+	temp->data.status = 0;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Iron throne";
+	temp->data.birth_date = "22/05/1988";
+	temp->data.class_id = 3;
+	temp->data.enrolment_date = "01/01/1990";
+	temp->data.id = 301;
+	temp->data.name = "Robert Baratheon";
+	temp->data.status = 1;
+	tree.insert_node(root, temp);
+	temp = new node;
+	temp->data.adress = "Winterfell";
+	temp->data.birth_date = "23/10/1985";
+	temp->data.class_id = 3;
+	temp->data.enrolment_date = "01/01/2015";
+	temp->data.id = 302;
+	temp->data.name = "Eddard Stark";
+	temp->data.status = 1;
+	tree.insert_node(root, temp);
+}
+
+int main()
+{
+	int choice;
+    binary_search_tree students;
+	insert_some_students(students);
+	cout << "Supported operations : " << endl << endl;
+	cout << "1.Find student by ID " << endl;
+	cout << "2.List students by class" << endl;
+	cout << "3.List all students " << endl;
+	cout << "4.Delete student by ID" << endl;
+	cout << "5.Delete all graduated students" << endl;
+	cout << "6.Quit application" << endl << endl;
+	int status, given_id;
+	bool updating;
+    while (1)
+    {
+		cout << "Operation : ";
+        cin>>choice;
+		cout << endl;
+        switch(choice)
+        {
+        case 1:
+            cout<<"Enter the ID : ";
+			cin >> given_id;
+			node *parent, *location;
+			if (root == NULL)
+			{
+				cout << "There is no student in the database !" << endl;
+				break;
+			}
+			students.find_node(given_id, &parent, &location);
+			if (location == NULL)
+			{
+				cout << "Student not found !" << endl;
+				break;
+			}
+			display_student_info(location);
+			cout << "1.Update name " << endl;
+			cout << "2.Update ID " << endl;
+			cout << "3.Update class ID " << endl;
+			cout << "4.Update adress" << endl;
+			cout << "5.Update birth date" << endl;
+			cout << "6.Update enrolment date" << endl;
+			cout << "7.Update status" << endl;
+			cout << "8.Don`t update" << endl << endl;
+			updating = 1;
+			while (updating)
+			{
+				cout << "Update : ";
+				cin >> choice;
+				cout << endl;
+				char input[100];
+				int new_status;
+				switch (choice)
+				{
+				case 1:
+					cout << "Type the new name : ";
+					cin.get();
+					cin.getline(input, 100);
+					location->data.name = input;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 2:
+					cout << "Type the new id : ";
+					cin >> given_id;
+					node *new_parent, *new_location;
+					students.find_node(given_id, &new_parent, &new_location);
+					if (new_location != NULL && location != new_location)
+					{
+						cout << "ID already exists !" << endl;
+						break;
+					}
+					else
+					{
+						new_location->data.id = given_id;
+						cout << "\nSuccessfully updated !\n\n";
+					}
+					break;
+				case 3:
+					cout << "Type the new class id : ";
+					cin >> given_id;
+					new_location->data.class_id = given_id;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 4:
+					cout << "Type the new adress : ";
+					cin.get();
+					cin.getline(input, 100);
+					location->data.adress = input;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 5:
+					cout << "Type the new date : ";
+					cin.get();
+					cin.getline(input, 100);
+					location->data.adress = input;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 6:
+					cout << "Type the new date : ";
+					cin.get();
+					cin.getline(input, 100);
+					location->data.adress = input;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 7:
+					cout << "Type the new status (0 for undergraduate/1 for graduated) : ";
+					cin >> new_status;
+					location->data.status = (new_status == 1)?true:false;
+					cout << "\nSuccessfully updated !\n\n";
+					break;
+				case 8:
+					updating = 0;
+					break;
+				default:
+					cout << "Wrong choice" << endl << endl;
+				}
+			}
+			break;
+        case 2:
+			cout << "To display all students undergraduate students type 1 , for graduated ones type 2 , 3 for all : ";
+			cin >> status;
+			cout << endl;
+			while (status < 1 || status > 3)
+			{
+				cout << "Option " << status << " does not exist , please try again : ";
+				cin >> status;
+			}
+			status--;
+			students.display_by_class(root, status);
+            break;
+        case 3:
+			cout << "To display undergraduate students students type 1 , for graduated ones type 2 , 3 for all : ";
+			cin >> status;
+			cout << endl;
+			while (status < 1 || status > 3)
+			{
+				cout << "Option " << status << " does not exist , please try again : ";
+				cin >> status;
+			}
+			status--;
+			students.lexicographic_display(root, status);
+            break;
+		case 4:
+			cout << "Enter the ID : ";
+			cin >> given_id;
+			cout << endl;
+			students.delete_node(given_id);
+            break;
+        case 5:
+			students.delete_students(root,1);
+            break;
+        case 6:
+            exit(1);
+        default:
+			cout << "Wrong choice" << endl << endl;
+        }
+    }
+}
+ 
+void binary_search_tree::find_node(int id, node **par, node **loc)
+{
+    node *ptr, *ptrsave;
+    if (root == NULL)
+    {
+        *loc = NULL;
+        *par = NULL;
+        return;
+    }
+    if (id == root->data.id)
+    {
+        *loc = root;
+        *par = NULL;
+        return;
+    }
+    if (id < root->data.id)
+        ptr = root->left;
+    else
+        ptr = root->right;
+    ptrsave = root;
+    while (ptr != NULL)
+    {
+        if (id == ptr->data.id)
+        {
+            *loc = ptr;
+            *par = ptrsave;
+            return;
+        }
+        ptrsave = ptr;
+        if (id < ptr->data.id)
+            ptr = ptr->left;
+	else
+	    ptr = ptr->right;
+    }
+    *loc = NULL;
+    *par = ptrsave;
+}
+ 
+void binary_search_tree::insert_node(node *tree, node *newnode)
+{
+    if (root == NULL)
+    {
+        root = new node;
+		(*root) = (*newnode);
+        root->left = NULL;
+        root->right = NULL;
+        return;
+    }
+    if (tree->data.id == newnode->data.id)
+    {
+        cout<<"There already is a student with this id !  "<< tree->data.id <<"   "<< newnode->data.id<<endl;
+        return;
+    }
+    if (tree->data.id > newnode->data.id)
+    {
+        if (tree->left != NULL)
+        {
+            insert_node(tree->left, newnode);	
+	}
+	else
+	{
+            tree->left = newnode;
+            (tree->left)->left = NULL;
+            (tree->left)->right = NULL;
+            return;
+        }
+    }
+    else
+    {
+        if (tree->right != NULL)
+        {
+            insert_node(tree->right, newnode);
+        }
+        else
+        {
+            tree->right = newnode;
+            (tree->right)->left = NULL;
+            (tree->right)->right = NULL;
+            return;
+        }	
+    }
+}
+ 
+void binary_search_tree::delete_node(int id)
+{
+    node *parent, *location;
+    if (root == NULL)
+    {
+        cout<<"There is no student in the database !"<<endl<<endl;
+        return;
+    }
+    find_node(id, &parent, &location);
+    if (location == NULL)
+    {
+		cout << "Student not found !" << endl << endl;
+        return;
+    }
+    if (location->left == NULL && location->right == NULL)
+        case_a(parent, location);
+    if (location->left != NULL && location->right == NULL)
+        case_b(parent, location);
+    if (location->left == NULL && location->right != NULL)
+        case_b(parent, location);
+    if (location->left != NULL && location->right != NULL)
+        case_c(parent, location);
+	cout << location->data.name<<" successfully deleted !" << endl << endl;
+    //free(location);
+}
+ 
+void binary_search_tree::case_a(node *par, node *loc )
+{
+    if (par == NULL)
+    {
+        root = NULL;
+    }
+    else
+    {
+        if (loc == par->left)
+            par->left = NULL;
+        else
+            par->right = NULL;
+    }
+}
+
+void binary_search_tree::case_b(node *par, node *loc)
+{
+    node *child;
+    if (loc->left != NULL)
+        child = loc->left;
+    else
+        child = loc->right;
+    if (par == NULL)
+    {
+        root = child;
+    }
+    else
+    {
+        if (loc == par->left)
+            par->left = child;
+        else
+            par->right = child;
+    }
+}
+
+void binary_search_tree::case_c(node *par, node *loc)
+{
+    node *ptr, *ptrsave, *suc, *parsuc;
+    ptrsave = loc;
+    ptr = loc->right;
+    while (ptr->left != NULL)
+    {
+        ptrsave = ptr;
+        ptr = ptr->left;
+    }
+    suc = ptr;
+    parsuc = ptrsave;
+    if (suc->left == NULL && suc->right == NULL)
+        case_a(parsuc, suc);
+    else
+        case_b(parsuc, suc);
+    if (par == NULL)
+    {
+        root = suc;
+    }
+    else
+    {
+        if (loc == par->left)
+            par->left = suc;
+        else
+            par->right = suc;
+    }
+    suc->left = loc->left;
+    suc->right = loc->right;
+}
+
+void create_map_by_class(node *ptr,map<int,list<string>> &students_by_class, int status)
+{
+	if (ptr != NULL)
+	{
+		if(status == 2)
+		students_by_class[ptr->data.class_id].push_back(ptr->data.name);
+		else if (status == int(ptr->data.status))
+			students_by_class[ptr->data.class_id].push_back(ptr->data.name);
+		create_map_by_class(ptr->left, students_by_class,status);
+		create_map_by_class(ptr->right, students_by_class,status);
+	}
+}
+
+void binary_search_tree::display_by_class(node *ptr, int status)
+{
+	if (root == NULL)
+	{
+		cout << "No students to display !" << endl;
+		return;
+	}
+	map<int, list<string>> students_by_class;
+	create_map_by_class(ptr, students_by_class,status);
+	for (auto index1 = students_by_class.begin(); index1 != students_by_class.end(); index1++)
+	{
+		cout << "Class " << (*index1).first << " : " << endl;
+		(*index1).second.sort();
+		for (auto index2 = (*index1).second.begin(); index2 != (*index1).second.end(); index2++)
+			cout << "	" << (*index2) << endl;
+		cout << endl ;
+	}
+}
+
+void get_student_name_list(node *ptr, list<string> &student_names , int status)
+{
+	if (ptr != NULL)
+	{
+		if (status == 2)
+				student_names.push_back(ptr->data.name);
+			else if (status == int(ptr->data.status))
+				student_names.push_back(ptr->data.name);
+		get_student_name_list(ptr->left, student_names, status);
+		get_student_name_list(ptr->right, student_names, status);
+	}
+}
+
+void binary_search_tree::lexicographic_display(node *ptr,int status)
+{
+	if (root == NULL)
+	{
+		cout << "No students to display !" << endl;
+		return;
+	}
+	list<string> student_names;
+	get_student_name_list(ptr, student_names, status);
+	student_names.sort();
+	for (auto index1 = student_names.begin(); index1 != student_names.end(); index1++)
+	{
+		cout << "	" << (*index1) << endl;
+	}
+	cout << endl;
+}
+
+void get_students_id(node *ptr, list<int> &student_id, int status)
+{
+	if (ptr != NULL)
+	{
+		if (status == 2)
+			student_id.push_back(ptr->data.id);
+		else if (status == int(ptr->data.status))
+			student_id.push_back(ptr->data.id);
+		get_students_id(ptr->left, student_id, status);
+		get_students_id(ptr->right, student_id, status);
+	}
+}
+
+void binary_search_tree::delete_students(node *ptr,int status)
+{
+	if (root == NULL)
+	{
+		cout << "No students to display !" << endl;
+		return;
+	}
+	list<int> student_id;
+	get_students_id(ptr, student_id, status);
+	for (auto index1 = student_id.begin(); index1 != student_id.end(); index1++)
+		delete_node(*index1);
+	cout << endl;
+}

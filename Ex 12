@@ -1,0 +1,135 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <limits.h>
+using namespace std;
+
+void print_path(int first_vertex, int last_vertex, int *current_path,int length)
+{
+	cout << "Longest path found in the graph is : ";
+	stack<int> path;
+	while (last_vertex != first_vertex)
+	{
+		path.push(last_vertex);
+		last_vertex = current_path[last_vertex];
+	}
+	while (!path.empty())
+	{
+		cout << first_vertex << " -> ";
+		first_vertex = path.top();
+		path.pop();
+	}
+	cout << first_vertex << " and it is of length = " << length << endl;
+}
+
+// this class contains one side of the incident_edges and the weight of it , we`ll use it to create adiacence lists
+class incident_edges
+{
+public:
+	int adiacent_vertex;
+	int weight;
+	incident_edges(int vertex, int edge_weight)
+	{
+		adiacent_vertex = vertex;
+		weight = edge_weight;
+	}
+};
+
+class weighted_directed_graph
+{
+	int vertices_number; 
+	list<incident_edges> *list_of_adiacence;
+	void get_connected_component(int adiacent_vertex, bool visited[], stack<int> &connected_component);
+public:
+	weighted_directed_graph(int number_of_vertices) 
+	{
+		vertices_number = number_of_vertices;
+		list_of_adiacence = new list<incident_edges>[vertices_number];
+	}
+	void addEdge(int vertex, int adiacent_vertex, int weight)
+	{
+		incident_edges edge(adiacent_vertex, weight);
+		list_of_adiacence[vertex].push_back(edge);
+	}
+	void print_longest_path();
+};
+
+void weighted_directed_graph::get_connected_component(int adiacent_vertex, bool visited[], stack<int> &connected_component)
+{
+	visited[adiacent_vertex] = true;
+	for (auto i = list_of_adiacence[adiacent_vertex].begin(); i != list_of_adiacence[adiacent_vertex].end(); ++i)
+	{
+		incident_edges edge = *i;
+		if (!visited[edge.adiacent_vertex])
+			get_connected_component(edge.adiacent_vertex, visited, connected_component);
+	}
+	connected_component.push(adiacent_vertex);
+}
+
+void weighted_directed_graph::print_longest_path()
+{
+	stack<int> connected_component;
+	int max_distance[100];
+	bool *visited = new bool[vertices_number];
+	int current_path[100];
+	int longest_path[100];
+	int longest_path_value = INT_MIN;
+	int last_vertex;
+	int first_vertex;
+	for (int vertex = 0;vertex < vertices_number;vertex++)
+	{
+		while (!connected_component.empty())
+			connected_component.pop();
+		for (int i = 0; i < vertices_number; i++)
+			visited[i] = false;
+		get_connected_component(vertex, visited, connected_component);
+		for (int i = 0; i < vertices_number; i++)
+			max_distance[i] = INT_MIN;
+		max_distance[vertex] = 0;
+		for (int i = 0; i < vertices_number; i++)
+			current_path[i] = 0;
+		while (connected_component.empty() == false)
+		{
+			int adiacent_vertex = connected_component.top();
+			connected_component.pop();
+			if (max_distance[adiacent_vertex] != INT_MIN)
+			{
+				for (auto i = list_of_adiacence[adiacent_vertex].begin(); i != list_of_adiacence[adiacent_vertex].end(); ++i)
+					if (max_distance[i->adiacent_vertex] < max_distance[adiacent_vertex] + i->weight)
+					{
+						max_distance[i->adiacent_vertex] = max_distance[adiacent_vertex] + i->weight;
+						current_path[i->adiacent_vertex] = adiacent_vertex;
+					}
+			}
+			if (max_distance[adiacent_vertex] > longest_path_value)
+			{
+				last_vertex = adiacent_vertex;
+				first_vertex = vertex;
+				longest_path_value = max_distance[adiacent_vertex];
+				for (int i = 0; i < vertices_number; i++)
+					longest_path[i] = current_path[i];
+			}
+		}
+	}
+	print_path(first_vertex, last_vertex, longest_path,longest_path_value);
+}
+
+int main()
+{
+	weighted_directed_graph g(7);
+	g.addEdge(0, 1, 5);
+	g.addEdge(0, 2, 3);
+	g.addEdge(1, 3, 6);
+	g.addEdge(1, 2, 2);
+	g.addEdge(2, 4, 4);
+	g.addEdge(2, 5, 2);
+	g.addEdge(2, 3, 20);
+	g.addEdge(3, 5, 1);
+	g.addEdge(3, 4, -1);
+	g.addEdge(4, 5, -2);
+	g.addEdge(1, 6, 20);
+	g.addEdge(5, 0, 120);
+
+	g.print_longest_path();
+	return 0;
+}

@@ -1,0 +1,119 @@
+#include<iostream>
+#include<ctime>
+#include<list>
+using namespace std;
+
+struct solution
+{
+	int size = 0;
+	list<int> colors;
+};
+
+struct matrix
+{
+	int values[100][100];
+	int nr_of_lines;
+	int nr_of_columns;
+};
+
+void get_random_matrix(matrix &my_matrix,int max_lines,int max_columns)
+{
+	srand((unsigned)time(0));
+	my_matrix.nr_of_lines = (rand() % max_lines) + 1;
+	my_matrix.nr_of_columns = (rand() % max_columns) + 1;
+	for (int line = 0;line < my_matrix.nr_of_lines;line++)
+		for (int column = 0;column < my_matrix.nr_of_columns;column++)
+			my_matrix.values[line][column] = (rand() % 9) + 1;
+}
+
+void display_list(list<int> my_list)
+{
+	for (auto iterator = my_list.begin();iterator != my_list.end();iterator++)
+		cout << (*iterator) << " ";
+	cout << endl;
+}
+
+void display_matrix(matrix my_matrix)
+{
+	for (int line = 0;line < my_matrix.nr_of_lines;line++)
+	{
+		for (int column = 0;column < my_matrix.nr_of_columns;column++)
+			cout << my_matrix.values[line][column] << "  ";
+		cout << endl;
+	}
+	cout << endl;
+}
+
+void extract_nodes(matrix &my_matrix,int color)
+{
+	for (int line = 0;line < my_matrix.nr_of_lines;line++)
+		for (int column = 0;column < my_matrix.nr_of_columns;column++)
+			if (my_matrix.values[line][column] == color)
+				my_matrix.values[line][column] = 0;
+			else my_matrix.values[line][column] = -1;
+}
+
+void complete_component(matrix &my_matrix, int  start_line,int start_column,int component_number,int &component_size)
+{
+	my_matrix.values[start_line][start_column] = component_number;
+	component_size++;
+	if (start_line + 1 < my_matrix.nr_of_lines)
+		if (!my_matrix.values[start_line + 1][start_column])
+			complete_component(my_matrix, start_line + 1, start_column, component_number, component_size);
+	if (start_line - 1 >= 0)
+		if (!my_matrix.values[start_line - 1][start_column])
+			complete_component(my_matrix, start_line - 1, start_column, component_number, component_size);
+	if (start_column + 1 < my_matrix.nr_of_columns)
+		if (!my_matrix.values[start_line][start_column + 1])
+			complete_component(my_matrix, start_line, start_column + 1, component_number, component_size);
+	if (start_column - 1 >= 0)
+		if (!my_matrix.values[start_line][start_column - 1])
+			complete_component(my_matrix, start_line , start_column - 1, component_number, component_size);
+}
+
+void get_connected_components(matrix my_matrix,solution &my_solution,int color)
+{
+	int nr_of_components = 0;
+	int component_size;
+	for (int line = 0;line < my_matrix.nr_of_lines;line++)
+		for (int column = 0;column < my_matrix.nr_of_columns;column++)
+			if (my_matrix.values[line][column] == 0)
+			{
+				nr_of_components++;
+				component_size = 0;
+				complete_component(my_matrix,line,column,nr_of_components,component_size);
+				if (component_size >= my_solution.size)
+					if (component_size == my_solution.size)
+						my_solution.colors.push_back(color);
+					else
+					{
+						my_solution.size = component_size;
+						my_solution.colors.clear();
+						my_solution.colors.push_back(color);
+					}
+			}
+}
+
+void get_maximal_components(matrix my_matrix , solution &my_solution)
+{
+	matrix unicoloured_matrix;
+	for (int color = 1;color <= 9;color++)
+	{
+		unicoloured_matrix = my_matrix;
+		extract_nodes(unicoloured_matrix,color);
+		get_connected_components(unicoloured_matrix,my_solution, color);
+	}
+}
+
+
+void main()
+{
+	matrix my_matrix;
+	solution my_solution;
+	//generating a random matrix , with at most 10 lines and 10 columns , you can change that , but no more than 100 for both 
+	get_random_matrix(my_matrix,10,10);
+	display_matrix(my_matrix);
+	get_maximal_components(my_matrix,my_solution);
+	printf("The size of the biggest connected set of the above matrix is %d and it has the color(s) : ", my_solution.size);
+	display_list(my_solution.colors);
+}

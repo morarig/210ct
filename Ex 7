@@ -1,0 +1,57 @@
+#include<iostream>
+#include<ctime>
+#include<vector>
+#include<algorithm>
+#include<math.h>
+using namespace std;
+
+struct matrix
+{
+	int values[100][100];
+	int size;
+};
+
+void display_matrix(matrix my_matrix)
+{
+	for (int line = 0;line < my_matrix.size;line++)
+	{
+		for (int column = 0;column < my_matrix.size;column++)
+			cout << my_matrix.values[line][column] << "  ";
+		cout << endl;
+	}
+	cout << endl;
+}
+
+void get_random_matrix(matrix &my_matrix, int min_size,int max_size ,int min_value,int max_value)
+{
+	int distance = max_value - min_value + 1;
+	srand((unsigned)time(0));
+	my_matrix.size = (rand() % (max_size - min_size + 1)) + min_size;
+	for (int line = 0;line < my_matrix.size;line++)
+		for (int column = 0;column < my_matrix.size;column++)
+			my_matrix.values[line][column] = (rand() % distance) + min_value;
+}
+
+void main()
+{
+	matrix my_matrix;
+	int result = 0;
+	get_random_matrix(my_matrix, 5, 10, -1000, 1000);
+	display_matrix(my_matrix);
+	vector<int> diagonal;
+	for (int index = my_matrix.size - 1;index >= 1 - my_matrix.size;index--)
+	{
+		int line = (index >= 0) ? index : 0;
+		int column = line - index;
+		for (int counter = 1;counter <= my_matrix.size - abs(index);counter++)
+		{
+			diagonal.push_back(my_matrix.values[line][column]);
+			line++;
+			column++;
+		}
+		sort(diagonal.begin(), diagonal.end());
+		result += diagonal[0];
+		diagonal.clear();
+	}
+	cout << "Minimum sum = " << result<<endl;
+}

@@ -1,0 +1,78 @@
+#include<iostream>
+#include<fstream>
+#include<set>
+#include<string>
+using namespace std;
+
+//doubly linked list , generic node
+struct node
+{
+	//set is a STL c++ conteiner that automatically sorts its elements (when inserting them) and does not insert duplicates
+	set<string> word_list;
+	int length = 0;
+	node *prev;
+	node *next;
+};
+
+node *my_list = NULL;
+
+void insertdata(char *new_word)
+{
+	int word_length = strlen(new_word);
+	//creating the first element
+	if (my_list == NULL)
+	{
+		my_list = new node;
+		my_list->word_list.insert(new_word);
+		my_list->length = word_length;
+		my_list->next = NULL;
+		my_list->prev = NULL;
+	}
+	else 
+	{
+		node* aux_node = my_list;
+		while (aux_node->length != word_length && aux_node->next != NULL)
+			aux_node = aux_node->next;
+		if (aux_node->next != NULL) //adding to the set , words of same length
+			aux_node->word_list.insert(new_word);
+		else //creates a new node for a word with a length that has not yet appeared 
+		{
+			node *new_node = new node;
+			new_node->length = word_length;
+			new_node->word_list.insert(new_word);
+			aux_node->next = new_node;
+			new_node->prev = aux_node;
+			new_node->next = NULL;
+		}
+	}
+}
+
+void display()
+{
+	node * aux_node = my_list;
+	while (aux_node->next != NULL)
+	{
+		cout << "List of words of length " << aux_node->length << " : \n";
+		for (auto iterator = aux_node->word_list.begin();iterator != aux_node->word_list.end();iterator++)
+			cout << (*iterator) << endl;
+		cout << endl;
+		aux_node = aux_node->next;
+	}
+}
+
+int main()
+{
+	ifstream file("input.txt");
+	char word[100];
+	if (file.is_open())
+	{
+		while (!file.eof()) 
+		{
+			file >> word;
+			insertdata(word);
+		}
+		display();
+		file.close();
+	}
+	return 0;
+}

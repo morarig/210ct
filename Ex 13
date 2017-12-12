@@ -1,0 +1,86 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+#define INFINITE 65535
+
+struct path
+{
+	int value = INFINITE , prev_x , prev_y = INFINITE;
+} path_matrix[100000][20];//declare bigger for graphs that have more then 20 vertices
+
+int  cost_matrix[20][20];
+int nr_vertex, nr_edge;
+
+void read_data()
+{
+	ifstream file("graph.in");
+	file >> nr_vertex;//reading number of vertices
+	nr_edge = 0;
+	int cost;
+	//reading the cost matrix cost_matrix, where cost_matrix[line][column] = the cost of the edge line-column , or the value INFINITE if there is no edge in between
+	for (int line = 0; line < nr_vertex; line++)
+		for (int column = 0; column < nr_vertex; column++)
+		{
+			file >> cost;
+			if (cost != INFINITE)
+				nr_edge++;
+			cost_matrix[line][column] = cost;
+		}
+	file.close();
+}
+
+void get_paths()
+{
+	path_matrix[1][0].value = 0;
+	nr_edge = (1 << nr_vertex) - 1;
+	for (int line = 0; line <= nr_edge; line++)
+		for (int column = 0; column < nr_vertex; column++)
+			if (line&(1 << column))
+				for (int vertex = 0; vertex < nr_vertex; vertex++)
+					if (cost_matrix[vertex][column] != INFINITE)
+						if (path_matrix[line ^ (1 << column)][vertex].value + cost_matrix[vertex][column] < path_matrix[line][column].value)
+						{
+							path_matrix[line][column].value = path_matrix[line ^ (1 << column)][vertex].value + cost_matrix[vertex][column];
+							path_matrix[line][column].prev_x = line ^ (1 << column);
+							path_matrix[line][column].prev_y = vertex;
+						}
+}
+
+void print_solution()
+{
+	int result = INFINITE;
+	int current_line, current_vertex, first_vertex;
+	for (int line = 0; line < nr_vertex; line++)
+		if (cost_matrix[line][0] != INFINITE && result > path_matrix[nr_edge][line].value + cost_matrix[line][0])
+		{
+			result = path_matrix[nr_edge][line].value + cost_matrix[line][0];
+			current_line = nr_edge;
+			current_vertex = line;
+			first_vertex = current_vertex;
+			break;
+		}
+	int line, column;
+	if (result == INFINITE) cout << "There is no Hamiltonian cycle in the  given graph !\n";
+	else
+	{
+		cout << "The Hamiltonian cycle of minimum cost found in the given graph is : \n";
+		do
+		{
+			cout << current_vertex << " -> ";
+			line = current_line;
+			column = current_vertex;
+			current_line = path_matrix[line][column].prev_x;
+			current_vertex = path_matrix[line][column].prev_y;
+		} while (current_vertex != INFINITE);
+		cout << first_vertex << "\nand it has the cost = " << result << endl;
+	}
+}
+
+void main()
+{
+	read_data();
+	get_paths();
+	print_solution();
+}

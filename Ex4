@@ -1,0 +1,63 @@
+#include<fstream>
+#include<string>
+#include<iostream>
+using namespace std;
+
+struct cube {
+	int edge_length;
+	char color[20];
+};
+cube cubes[100];
+
+int configuration[100], n, max_cubes;
+bool found_solution = 0;
+
+void display_solution()
+{
+	cout << "Highest tower configuration : \n";
+	for (int index = max_cubes;index >= 1;index--)
+		cout << cubes[configuration[index]].edge_length << " " << cubes[configuration[index]].color << endl;
+	
+}
+
+int verify_candidate(int position)
+{
+	if (position>1)
+		if (cubes[configuration[position - 1]].edge_length>cubes[configuration[position]].edge_length)
+			if (strcmp(cubes[configuration[position - 1]].color, cubes[configuration[position]].color) != 0) return 1;
+			else return 0;
+		else return 0;
+	else return 1;
+}
+
+void find_highest_tower(int position)
+{
+	for (int index = 1;index <= n;index++)
+	{
+		configuration[position] = index;
+		if (verify_candidate(position))
+		{
+			if (position == max_cubes)
+			{
+				display_solution();
+				found_solution = 1;
+				break;
+			}
+			find_highest_tower(position + 1);
+		}
+	}
+}
+
+void main()
+{
+	ifstream f("cubes.in");
+	f >> n;//read number of cubes
+	max_cubes = n;
+	for (int index = 1;index <= n;index++) f >> cubes[index].edge_length >> cubes[index].color;//read pair of edge length and color for each cube
+	f.close();
+	while (!found_solution)
+	{
+		find_highest_tower(1);
+		max_cubes--;
+	}
+}

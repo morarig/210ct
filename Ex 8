@@ -1,0 +1,58 @@
+#include <iostream>
+using namespace std;
+
+void swap(int i,int j, int *a){
+    int temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+
+int mth(int *arr,int n,int m) 
+{
+	m--;
+	int aux;
+	do
+	{
+		aux = arr[m];
+		if (m > 0)
+			for (int index = m - 1;index >= 0;index--)
+				if (arr[index] > arr[m])
+					swap(index, m, arr);
+		if (m < n - 1)
+			for (int index = m + 1;index < n;index++)
+				if (arr[index] < arr[m])
+					swap(index, m, arr);
+	} while (aux != arr[m]);
+	return arr[m];
+}
+
+int main() {
+	int arr[100], n, m;
+	cout << "Type the length of your array : ";
+	cin >> n;
+	cout << "Type your " << n << " elements of the array : ";
+	for (int index = 0;index < n;index++)
+		cin >> arr[index];
+	bool valid_m = 0;
+	cout << "Type the value m : ";
+	while (!valid_m)
+	{
+		cin >> m;
+		if (m < 0 || m > n)
+			cout << "Invalid value , please try again : ";
+		else valid_m = 1;
+	}
+	switch (m)
+	{
+	case 1:cout << "The 1st element of the sorted array is : " << mth(arr, n, m) << endl;
+		break;
+	case 2:cout << "The 2nd element of the sorted array is : " << mth(arr, n, m) << endl;
+		break;
+	case 3:cout << "The 3rd element of the sorted array is : " << mth(arr, n, m) << endl;
+		break;
+	default:cout << "The " << m << "th element of the sorted array is : " << mth(arr, n, m) << endl;
+		break;
+
+	}
+    return 0;
+}

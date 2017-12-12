@@ -1,0 +1,44 @@
+#include<iostream>
+#include<cstring>
+using namespace std;
+#define MIN(a,b) ((a)<(b)?(a):(b))
+
+struct word
+{
+	char characters[256];
+	int length;
+};
+
+int dist(word word1, word word2, int solution[256][256])
+{
+	for (int index = 0; index <= word1.length; index++)
+		solution[index][0] = index * 4;//if the second word is null , then we insert all the other characters
+	for (int index = 0; index <= word2.length; index++)
+		solution[0][index] = index * 3;//if the first word is null , then we delete all the other characters
+	for (int index1 = 1; index1 <= word1.length; index1++)
+	{
+		for (int index2 = 1; index2 <= word2.length; index2++)
+		{
+			if (word1.characters[index1 - 1] == word2.characters[index2 - 1])
+				solution[index1][index2] = solution[index1 - 1][index2 - 1];
+			else
+				solution[index1][index2] = MIN(((solution[index1 - 1][index2] + 3))/*deletion*/, (MIN((solution[index1][index2 - 1] + 4)/*insertion*/, (solution[index1 - 1][index2 - 1] + 5)/*replacement*/)));
+		}
+	}
+
+	return solution[word1.length][word2.length];
+}
+
+int main()
+{
+	word word1, word2;
+	int solution[256][256];
+	cout << "Type the first string : ";
+	cin.getline(word1.characters, 256);
+	word1.length = strlen(word1.characters);
+	cout << "Type the second string : ";
+	cin.getline(word2.characters, 256);
+	word2.length = strlen(word2.characters);
+	cout <<"The minimum cost to convert \""<<word2.characters<<"\" to \""<<word1.characters<<"\" is : "<< dist(word1, word2, solution) << endl;
+	return 0;
+}
